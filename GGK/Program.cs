@@ -24,8 +24,8 @@ namespace GGK
                         bst.Search();
                         break;
                     case 2:ShortestPathRoutingAlgorithm spra = new ShortestPathRoutingAlgorithm();
-                        //spra.ScanData();
-                        //spra.FindPath();
+                        spra.ScanData();
+                        spra.FindPath();
                         break;
                     case 3:ConsecutivePrimeSum cps = new ConsecutivePrimeSum();
                         cps.ScanData();
@@ -107,7 +107,7 @@ namespace GGK
         protected internal void ScanData()
         {
             Console.Write("Enter the data:");
-            string[] str = Console.ReadLine().Split(' ');
+            string[] str = Console.ReadLine().Trim().Split(new char[0], StringSplitOptions.RemoveEmptyEntries);
             foreach(string s in str)
                 addNode(Convert.ToInt32(s));
         }
@@ -157,22 +157,68 @@ namespace GGK
 
     class ShortestPathRoutingAlgorithm
     {
+        int n, start = 0, end = 0, dist = 0;
 
+        protected internal class Node
+        {
+            protected internal int name;
+            protected internal Dictionary<int, int> adjNode;
+        }
+
+        protected internal void ScanData()
+        {
+            Console.Write("Enter the data:");
+            string[] str = Console.ReadLine().Trim().Split(new char[0], StringSplitOptions.RemoveEmptyEntries);
+
+            for (int i = 0; i < n; i++)
+            {
+                Node temp = new Node();
+                Console.Write("Enter the node name: ");
+                temp.name = int.Parse(Console.ReadLine());
+
+                Console.Write("Enter Number of Connected Nodes: ");
+                int num = int.Parse(Console.ReadLine());
+                for (int j = 0; j < num; j++)
+                {
+                    Console.Write("Enter the Node name: ");
+                    int name = int.Parse(Console.ReadLine());
+                    Console.Write("Enter the Node distance: ");
+                    int dist = int.Parse(Console.ReadLine());
+
+                    temp.adjNode.Add(name, dist);
+                }
+            }
+
+            Console.Write("Enter the starting node: ");
+            start = int.Parse(Console.ReadLine());
+            Console.Write("Enter the ending node: ");
+            end = int.Parse(Console.ReadLine());
+        }
+
+        protected internal void FindPath()
+        {
+            int shortestDist = GetPath(start, end, dist);
+        }
+
+        protected internal int GetPath(int s, int e, int d)
+        {
+            return 1;
+        }
     }
 
     class ConsecutivePrimeSum
     {
-        int input;
-        List<int> primeList = new List<int>();
-        internal protected void PopulatePrimeList(int n)
+        long input;
+        List<long> primeList = new List<long>();
+        internal protected void PopulatePrimeList(long n)
         {
             primeList.Add(2);
 
-            for(int i = 3; i <= n; i++)
+            for(long i = 3; i <= n; i++)
             {
                 bool isPrime = true;
 
-                foreach(int p in primeList)
+                foreach(long p in primeList)
                 {
                     if (i % p == 0)
                         isPrime = false;
@@ -188,15 +234,21 @@ namespace GGK
         internal protected void ScanData()
         {
             Console.Write("Enter the Maximum Range Value: ");
-            input = Convert.ToInt32(Console.ReadLine());
+            input = Convert.ToInt64(Console.ReadLine().Trim());
+
+            if(input <= 3)
+            {
+                Console.WriteLine("Invalid Input !!");
+                System.Environment.Exit(0);
+            }
         }
 
         internal protected void FindCPS()
         {
             PopulatePrimeList(input);
 
-            int count = 0, consecutiveSum = 2;
-            foreach(int p in primeList)
+            long count = 0, consecutiveSum = 2;
+            foreach(long p in primeList)
             {
                 consecutiveSum += p;
 
@@ -222,77 +274,41 @@ namespace GGK
 
         internal protected void FindSum()
         {
-            int iter = 1, len = n1.Length < n2.Length ? n1.Length: n2.Length, carry = 0;
+            int len = n1.Length > n2.Length ? n1.Length - 1: n2.Length - 1, carry = 0;
             string output = "";
 
-            while(len != 0)
+            if (n1.Length > n2.Length)
+                n2 = n2.PadLeft(n1.Length, '0');
+            else
+                n1 = n1.PadLeft(n2.Length, '0');
+
+            while (len != -1)
             {
-                int sum = int.Parse(n1[n1.Length - iter].ToString()) + int.Parse(n2[n2.Length - iter].ToString());
+                int sum = int.Parse(n1[len].ToString()) + int.Parse(n2[len].ToString());
+
+                sum += carry;
+
                 if (sum >= 10)
                 {
-                    if(carry >= 1)
-                        output += (sum % 10) + 1;
-                    else
-                        output += (sum % 10);
+                    output += sum % 10;
                     carry = sum / 10;
                 }
                 else
                 {
-                    if (carry >= 1)
-                        output += sum + 1;
-                    else
-                        output += sum;
+                    output += sum;
                     carry = 0;
                 }
-                iter++;
                 len--;
             }
-
-            if (n1.Length > n2.Length)
-            {
-                for(int i = n1.Length - n2.Length - 1; i >= 0; i--)
-                {
-                    int num;
-
-                    if(carry >= 1)
-                    {
-                        num = int.Parse(n1[i].ToString()) + carry;
-                        if (num >= 10)
-                        {
-                            output += (num % 10);
-                            carry = num / 10;
-                        }
-                        else
-                            output += num;
-                    }
-                }
-            }
-            else if (n2.Length > n1.Length)
-            {
-                for (int i = n2.Length - n1.Length - 1; i >= 0; i--)
-                {
-                    int num;
-
-                    if (carry >= 1)
-                    {
-                        num = int.Parse(n2[i].ToString()) + carry;
-                        if (num >= 10)
-                        {
-                            output += (num % 10);
-                            carry = num / 10;
-                        }
-                        else
-                            output += num;
-                    }
-                }
-            }
-            else if (carry >= 1)
-                output += carry;
 
             if (carry >= 1)
                 output += carry;
 
-            Console.WriteLine(output);
+            char[] arr = output.ToCharArray();
+            Array.Reverse(arr);
+            output = new string(arr);
+
+            Console.WriteLine("The sum of " + n1 + " and " + n2 + " is: " + output);
         }
     }
 
